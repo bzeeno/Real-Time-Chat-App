@@ -92,9 +92,7 @@ func Login(c *fiber.Ctx) error {
 
 	c.Cookie(cookie) // set cookie in fiber context
 
-	return c.JSON(fiber.Map{
-		"message": "Successfully Logged In :)",
-	})
+	return c.JSON(user)
 
 }
 
@@ -141,6 +139,6 @@ func Logout(c *fiber.Ctx) error {
 	c.Cookie(cookie)
 
 	return c.JSON(fiber.Map{
-		"message": "Successfully Logged Out :)",
+		"message": "",
 	})
 }
