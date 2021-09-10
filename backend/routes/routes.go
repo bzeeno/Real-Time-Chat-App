@@ -14,6 +14,8 @@ func Setup(app *fiber.App) {
 	// Friends
 	app.Post("/api/add-friend", api.AddFriend)
 	app.Post("/api/remove-friend", api.RemoveFriend)
+	app.Post("/api/search-friend", api.SearchUsers)
+	app.Post("/api/check-friend", api.CheckIfFriends)
 }
 
 func GetHome(c *fiber.Ctx) error {
