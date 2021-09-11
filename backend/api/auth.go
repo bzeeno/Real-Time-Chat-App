@@ -96,7 +96,7 @@ func Login(c *fiber.Ctx) error {
 
 }
 
-func GetUser(c *fiber.Ctx) error {
+func GetUserAuth(c *fiber.Ctx) error {
 	cookie := c.Cookies("jwt") // get cookie
 	userCollection := database.DB.Collection("users")
 	var user models.User
@@ -118,13 +118,12 @@ func GetUser(c *fiber.Ctx) error {
 		log.Fatal(err)
 	}
 
-	if err := userCollection.FindOne(database.Context, bson.M{"_id": objID}).Decode(&user); err != nil { // Get user with specified email
+	if err := userCollection.FindOne(database.Context, bson.M{"_id": objID}).Decode(&user); err != nil { // Get user with specified id
 		c.Status(fiber.StatusUnauthorized) // if couldn't get token
 		return c.JSON(fiber.Map{           // send message
 			"message": "Couldn't get cookie",
 		})
 	}
-
 	return c.JSON(user)
 }
 
@@ -141,4 +140,31 @@ func Logout(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "",
 	})
+}
+
+// Function for getting model of user who is currently logged in. If user is not logged in: fatal error.
+func GetUser(c *fiber.Ctx) models.User {
+	cookie := c.Cookies("jwt") // get cookie
+	userCollection := database.DB.Collection("users")
+	var user models.User
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SECRET_KEY), nil
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+	objID, err := primitive.ObjectIDFromHex(claims.Issuer) // convert issuer in claims to mongo objectID
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := userCollection.FindOne(database.Context, bson.M{"_id": objID}).Decode(&user); err != nil { // Get user with specified id
+		log.Fatal(err)
+	}
+
+	return (user)
 }
