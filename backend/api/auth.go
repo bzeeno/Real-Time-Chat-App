@@ -30,6 +30,7 @@ func Register(c *fiber.Ctx) error {
 		Email:      data["email"],
 		Password:   password,
 		Friends:    []primitive.ObjectID{},
+		FriendReqs: []primitive.ObjectID{},
 		Rooms:      []primitive.ObjectID{},
 		ProfilePic: "default_pic.jpeg",
 	}
@@ -153,17 +154,17 @@ func GetUser(c *fiber.Ctx) models.User {
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		return user
 	}
 
 	claims := token.Claims.(*jwt.StandardClaims)
 	objID, err := primitive.ObjectIDFromHex(claims.Issuer) // convert issuer in claims to mongo objectID
 	if err != nil {
-		log.Fatal(err)
+		return user
 	}
 
 	if err := userCollection.FindOne(database.Context, bson.M{"_id": objID}).Decode(&user); err != nil { // Get user with specified id
-		log.Fatal(err)
+		return user
 	}
 
 	return (user)

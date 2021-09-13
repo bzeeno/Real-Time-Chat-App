@@ -12,7 +12,9 @@ func Setup(app *fiber.App) {
 	app.Get("/api/getuser", api.GetUserAuth)
 	app.Post("/api/logout", api.Logout)
 	// Friends
-	app.Get("/api/get-friends", api.GetAllFriends)
+	app.Get("/api/get-friends", api.GetFriends)
+	app.Get("/api/get-friend-reqs", api.GetFriendReqs)
+	app.Post("/api/get-friend-info", api.GetFriendInfo)
 	app.Post("/api/add-friend", api.AddFriend)
 	app.Post("/api/remove-friend", api.RemoveFriend)
 	app.Post("/api/search-friend", api.SearchUsers)

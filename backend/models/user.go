@@ -10,6 +10,7 @@ type User struct {
 	Email      string               `json:"email" bson:"email"`
 	Password   []byte               `json:"password" bson:"password"`
 	Friends    []primitive.ObjectID `json:"friends" bson:"friends"`
+	FriendReqs []primitive.ObjectID `json:"friend_reqs" bson:"friend_reqs"`
 	Rooms      []primitive.ObjectID `json:"rooms" bson:"rooms"`
 	ProfilePic string               `json:"profile_pic" bson:"profile_pic"`
 }
