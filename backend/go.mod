@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/gofiber/fiber/v2 v2.18.0
+	github.com/gofiber/websocket/v2 v2.0.10
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	go.mongodb.org/mongo-driver v1.7.2
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
@@ -11,10 +12,12 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.2 // indirect
+	github.com/fasthttp/websocket v1.4.3-rc.8 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/klauspost/compress v1.13.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/savsgio/gotils v0.0.0-20210617111740-97865ed5a873 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.29.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

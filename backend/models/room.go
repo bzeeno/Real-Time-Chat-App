@@ -7,12 +7,16 @@ import (
 var mongoURI = "mongodb://localhost:27017"
 
 type Room struct {
-	ID       primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name     string               `json:"name" bson:"name"`
-	People   []primitive.ObjectID `json:"people" bson:"people"`
-	Messages []Message            `json:"messages" bson:"messages"`
+	ID         primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name       string               `json:"name" bson:"name"`
+	People     []primitive.ObjectID `json:"people" bson:"people"`
+	Messages   []Message            `json:"messages" bson:"messages"`
+	FriendRoom bool                 `json:"friend_room" bson:"friend_room"`
+	RoomPic    string               `json:"room_pic" bson:"room_pic"`
 }
 
 type Message struct {
-	name, text string
+	ID   primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name string             `json:"name" bson:"name"`
+	Text string             `json:"text" bson:"text"`
 }

@@ -100,6 +100,7 @@ func AddFriend(c *fiber.Ctx) error {
 	var data map[string]string
 	var friend_is_pending bool
 	userCollection := database.DB.Collection("users")
+	roomCollection := database.DB.Collection("rooms")
 
 	if err := c.BodyParser(&data); err != nil {
 		return err
@@ -144,7 +145,6 @@ func AddFriend(c *fiber.Ctx) error {
 			}
 			// add user to friend's friend list
 			friend.Friends = append(friend.Friends, user.ID)
-			fmt.Println("Friend's friends: ", friend.Friends)
 			update_field = bson.D{primitive.E{Key: "friends", Value: friend.Friends}}
 			_, err = userCollection.UpdateOne(database.Context, bson.M{"_id": friend.ID}, bson.D{
 				{"$set", update_field},
@@ -155,7 +155,6 @@ func AddFriend(c *fiber.Ctx) error {
 
 			// remove friend from pending requests
 			new_friend_reqs := append(user.FriendReqs[:i], user.FriendReqs[i+1:]...)
-			fmt.Println("Friend reqs: ", new_friend_reqs)
 			update_field = bson.D{primitive.E{Key: "friend_reqs", Value: new_friend_reqs}}
 			_, err = userCollection.UpdateOne(database.Context, bson.M{"_id": user.ID}, bson.D{
 				{"$set", update_field},
@@ -163,6 +162,28 @@ func AddFriend(c *fiber.Ctx) error {
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			/* Create chat room for just these 2 friends
+			Set chat name to first half of user_id concatenated w/first half of friend id
+			this is so that if they remove each other as friends, we can delete their room*/
+			friend_id_str := friend.ID.Hex()
+			user_id_str := user.ID.Hex()
+			len_half_friend := len(friend_id_str) / 2
+			len_half_user := len(user_id_str) / 2
+			chat_name := user_id_str[len_half_user:] + friend_id_str[len_half_friend:]
+
+			new_room := models.Room{
+				Name:       chat_name,
+				People:     []primitive.ObjectID{user.ID, friend.ID},
+				Messages:   []models.Message{},
+				FriendRoom: true,
+			}
+			_, err = roomCollection.InsertOne(database.Context, new_room) // insert new room in database
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			friend_is_pending = true
 			return c.JSON(fiber.Map{
 				"message": "Successfully added friend",
@@ -196,6 +217,7 @@ func RemoveFriend(c *fiber.Ctx) error {
 	var data map[string]string
 	var user, friend models.User
 	userCollection := database.DB.Collection("users")
+	roomCollection := database.DB.Collection("rooms")
 
 	if err := c.BodyParser(&data); err != nil {
 		return err
@@ -247,6 +269,26 @@ func RemoveFriend(c *fiber.Ctx) error {
 	})
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Delete their chat room
+	friend_id_str := friend.ID.Hex()
+	user_id_str := user.ID.Hex()
+	len_half_friend := len(friend_id_str) / 2
+	len_half_user := len(user_id_str) / 2
+	chat_name1 := user_id_str[len_half_user:] + friend_id_str[len_half_friend:]
+	chat_name2 := friend_id_str[len_half_friend:] + user_id_str[len_half_user:]
+	fmt.Println("chat_name1: ", chat_name1)
+	fmt.Println("chat_name2: ", chat_name2)
+
+	if _, err = roomCollection.DeleteOne(database.Context, bson.M{"name": chat_name1}); err != nil { // if name == chat_name1, delete
+		fmt.Println("not chat_name1")
+		if _, err = roomCollection.DeleteOne(database.Context, bson.M{"name": chat_name2}); err != nil { // if name == chat_name2, delete
+			fmt.Println("not chat_name2 either")
+			return c.JSON(fiber.Map{
+				"message": err,
+			})
+		}
 	}
 
 	return c.JSON(fiber.Map{

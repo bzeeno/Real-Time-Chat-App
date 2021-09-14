@@ -19,8 +19,12 @@ func Setup(app *fiber.App) {
 	app.Post("/api/remove-friend", api.RemoveFriend)
 	app.Post("/api/search-friend", api.SearchUsers)
 	app.Post("/api/check-friend", api.CheckIfFriends)
-}
-
-func GetHome(c *fiber.Ctx) error {
-	return c.SendString("Home")
+	// Rooms
+	app.Get("/api/get-rooms", api.GetRooms)
+	app.Post("/api/get-messages", api.GetMessages)
+	app.Post("/api/get-room-info", api.GetRoomInfo)
+	app.Post("/api/create-room", api.CreateRoom)
+	app.Post("/api/leave-room", api.LeaveRoom)
+	// Websocket
+	app.Get("/chat/:id", chat.Connect)
 }
