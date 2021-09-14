@@ -1,10 +1,48 @@
 package chat
 
-import ("fmt"
-		"github.com/gofiber/websocket/v2"
+import (
+	"fmt"
+	"log"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
+	socketio "github.com/googollee/go-socket.io"
 )
 
-websocket.New(func(c *websocket.Conn) {
+func Chat(c *fiber.Ctx) error {
+	id := c.Params("id")
+	fmt.Println("ID: ", id)
+
+	server := socketio.NewServer(nil)
+
+	server.OnConnect("connection", func(so socketio.Conn) error {
+		fmt.Println("new connection")
+		return c.JSON(fiber.Map{
+			"message": "huuhhhhh",
+		})
+	})
+	return c.JSON(fiber.Map{
+		"message": "yuhhhhhhhh",
+	})
+}
+
+func Reader(c *websocket.Conn) {
+	for {
+		mt, msg, err := c.ReadMessage()
+		if err != nil {
+			log.Println("Error in read: ", err)
+			return
+		}
+		log.Println("received msg: ", string(msg))
+
+		if err := c.WriteMessage(mt, msg); err != nil {
+			log.Println("Error in write: ", err)
+			return
+		}
+	}
+}
+
+func Connect(c *websocket.Conn) {
 	// c.Locals is added to the *websocket.Conn
 	log.Println(c.Locals("allowed"))  // true
 	log.Println(c.Params("id"))       // 123
@@ -28,5 +66,5 @@ websocket.New(func(c *websocket.Conn) {
 			log.Println("write:", err)
 			break
 		}
-	}	
-})
+	}
+}

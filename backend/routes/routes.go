@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/bzeeno/RealTimeChat/api"
+	"github.com/bzeeno/RealTimeChat/chat"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,5 +27,5 @@ func Setup(app *fiber.App) {
 	app.Post("/api/create-room", api.CreateRoom)
 	app.Post("/api/leave-room", api.LeaveRoom)
 	// Websocket
-	app.Get("/chat/:id", chat.Connect)
+	app.Get("/chat/:id", chat.Chat)
 }
