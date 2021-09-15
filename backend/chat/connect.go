@@ -19,6 +19,16 @@ type ReturnMessage struct {
 }
 
 func Reader(c *websocket.Conn) {
+	log.Println("room id: ", c.Params("id")) // 123
+	room_id, _ := primitive.ObjectIDFromHex(c.Params("id"))
+	roomCollection := database.DB.Collection("rooms")
+	var room models.Room
+
+	if err := roomCollection.FindOne(database.Context, bson.M{"_id": room_id}).Decode(&room); err != nil { // Get room with specified id
+		log.Println("Couldn't get room")
+		return
+	}
+
 	for {
 		_, msg, err := c.ReadMessage()
 		if err != nil {
@@ -52,9 +62,20 @@ func Reader(c *websocket.Conn) {
 
 		// set username to currently logged in user
 		// set text to the received message
-		return_message := ReturnMessage{User: user.UserName, Text: string(msg)}
+		//return_message := ReturnMessage{User: user.UserName, Text: string(msg)}
+		return_message := models.Message{User: user.UserName, Text: string(msg)}
 
-		if err := c.WriteJSON(return_message); err != nil {
+		// Add new message to database
+		new_messages := append(room.Messages, return_message)
+		update_field := bson.D{primitive.E{Key: "messages", Value: new_messages}}
+		_, err = roomCollection.UpdateOne(database.Context, bson.M{"_id": room_id}, bson.D{
+			{"$set", update_field},
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err := c.WriteJSON(return_message); err != nil { // write return message
 			log.Println("Error in write: ", err)
 			return
 		}
