@@ -1,41 +1,60 @@
 package chat
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/bzeeno/RealTimeChat/database"
+	"github.com/bzeeno/RealTimeChat/models"
 	"github.com/gofiber/websocket/v2"
-	socketio "github.com/googollee/go-socket.io"
+	"github.com/golang-jwt/jwt"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Chat(c *fiber.Ctx) error {
-	id := c.Params("id")
-	fmt.Println("ID: ", id)
+const SECRET_KEY = "secret"
 
-	server := socketio.NewServer(nil)
-
-	server.OnConnect("connection", func(so socketio.Conn) error {
-		fmt.Println("new connection")
-		return c.JSON(fiber.Map{
-			"message": "huuhhhhh",
-		})
-	})
-	return c.JSON(fiber.Map{
-		"message": "yuhhhhhhhh",
-	})
+type ReturnMessage struct {
+	User string `json:"user"`
+	Text string `json:"text"`
 }
 
 func Reader(c *websocket.Conn) {
 	for {
-		mt, msg, err := c.ReadMessage()
+		_, msg, err := c.ReadMessage()
 		if err != nil {
 			log.Println("Error in read: ", err)
 			return
 		}
 		log.Println("received msg: ", string(msg))
 
-		if err := c.WriteMessage(mt, msg); err != nil {
+		// Get user who sent message
+		cookie := c.Cookies("jwt")
+
+		userCollection := database.DB.Collection("users")
+		var user models.User
+
+		token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) { // Get token
+			return []byte(SECRET_KEY), nil
+		})
+		if err != nil {
+			return
+		}
+
+		claims := token.Claims.(*jwt.StandardClaims)
+		objID, err := primitive.ObjectIDFromHex(claims.Issuer) // convert issuer in claims to mongo objectID
+		if err != nil {
+			return
+		}
+
+		if err := userCollection.FindOne(database.Context, bson.M{"_id": objID}).Decode(&user); err != nil { // Get user with specified id
+			return
+		}
+
+		// set username to currently logged in user
+		// set text to the received message
+		return_message := ReturnMessage{User: user.UserName, Text: string(msg)}
+
+		if err := c.WriteJSON(return_message); err != nil {
 			log.Println("Error in write: ", err)
 			return
 		}
@@ -44,10 +63,10 @@ func Reader(c *websocket.Conn) {
 
 func Connect(c *websocket.Conn) {
 	// c.Locals is added to the *websocket.Conn
-	log.Println(c.Locals("allowed"))  // true
-	log.Println(c.Params("id"))       // 123
-	log.Println(c.Query("v"))         // 1.0
-	log.Println(c.Cookies("session")) // ""
+	log.Println(c.Locals("allowed")) // true
+	log.Println(c.Params("id"))      // 123
+	log.Println(c.Query("v"))        // 1.0
+	log.Println(c.Cookies("jwt"))    // ""
 
 	// websocket.Conn bindings https://pkg.go.dev/github.com/fasthttp/websocket?tab=doc#pkg-index
 	var (

@@ -4,6 +4,7 @@ import (
 	"github.com/bzeeno/RealTimeChat/api"
 	"github.com/bzeeno/RealTimeChat/chat"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 )
 
 func Setup(app *fiber.App) {
@@ -15,6 +16,7 @@ func Setup(app *fiber.App) {
 	// Friends
 	app.Get("/api/get-friends", api.GetFriends)
 	app.Get("/api/get-friend-reqs", api.GetFriendReqs)
+	app.Post("/api/get-friend-chat", api.GetFriendChat)
 	app.Post("/api/get-friend-info", api.GetFriendInfo)
 	app.Post("/api/add-friend", api.AddFriend)
 	app.Post("/api/remove-friend", api.RemoveFriend)
@@ -27,5 +29,5 @@ func Setup(app *fiber.App) {
 	app.Post("/api/create-room", api.CreateRoom)
 	app.Post("/api/leave-room", api.LeaveRoom)
 	// Websocket
-	app.Get("/chat/:id", chat.Chat)
+	app.Get("/ws/:id", websocket.New(chat.Reader))
 }

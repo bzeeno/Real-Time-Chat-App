@@ -143,16 +143,16 @@ func Logout(c *fiber.Ctx) error {
 	})
 }
 
-// Function for getting model of user who is currently logged in. If user is not logged in: fatal error.
+// Function for getting model of user who is currently logged in. If user is not logged in: return empty user model
 func GetUser(c *fiber.Ctx) models.User {
 	cookie := c.Cookies("jwt") // get cookie
 	userCollection := database.DB.Collection("users")
 	var user models.User
 
+	// Get token
 	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(SECRET_KEY), nil
 	})
-
 	if err != nil {
 		return user
 	}

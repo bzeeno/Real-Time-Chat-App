@@ -13,12 +13,26 @@ import (
 // Get all rooms
 func GetRooms(c *fiber.Ctx) error {
 	user := GetUser(c) // Get user if authenticated
+	roomCollection := database.DB.Collection("rooms")
 
 	rooms := user.Rooms // get friends list
 
+	var rooms_list []primitive.ObjectID
+	var room models.Room
+	for _, room_id := range rooms {
+		if err := roomCollection.FindOne(database.Context, bson.M{"_id": room_id}).Decode(&room); err != nil { // Get room with specified id
+			return err
+		}
+		if room.FriendRoom == true {
+			continue
+		} else {
+			rooms_list = append(rooms_list, room.ID)
+		}
+	}
+
 	// return friends list and pending friends
 	return c.JSON(fiber.Map{
-		"rooms": rooms,
+		"rooms": rooms_list,
 	})
 }
 

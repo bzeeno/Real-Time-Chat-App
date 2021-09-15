@@ -58,6 +58,38 @@ func GetFriendInfo(c *fiber.Ctx) error {
 
 }
 
+func GetFriendChat(c *fiber.Ctx) error {
+	var data map[string]string
+	roomCollection := database.DB.Collection("rooms")
+	user := GetUser(c)
+	user_id := user.ID
+
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	// Get friend
+	friend := getFriend(data["friend_id"])
+	var room models.Room
+	var friend_room_id primitive.ObjectID
+	for _, room_id := range friend.Rooms {
+		if err := roomCollection.FindOne(database.Context, bson.M{"_id": room_id}).Decode(&room); err != nil { // Get room with specified id
+			return err
+		}
+		if room.FriendRoom == true {
+			for _, person_id := range room.People {
+				if person_id == user_id {
+					friend_room_id = room_id
+					break
+				}
+			}
+		}
+	}
+	return c.JSON(fiber.Map{
+		"room_id": friend_room_id,
+	})
+}
+
 // Search for friends to add
 func SearchUsers(c *fiber.Ctx) error {
 	var data map[string]string
@@ -163,23 +195,37 @@ func AddFriend(c *fiber.Ctx) error {
 				log.Fatal(err)
 			}
 
-			/* Create chat room for just these 2 friends
-			Set chat name to first half of user_id concatenated w/first half of friend id
-			this is so that if they remove each other as friends, we can delete their room*/
-			friend_id_str := friend.ID.Hex()
-			user_id_str := user.ID.Hex()
-			len_half_friend := len(friend_id_str) / 2
-			len_half_user := len(user_id_str) / 2
-			chat_name := user_id_str[len_half_user:] + friend_id_str[len_half_friend:]
+			/* Create chat room for just these 2 friends */
 
 			new_room := models.Room{
-				Name:       chat_name,
+				Name:       user.UserName + friend.UserName,
 				People:     []primitive.ObjectID{user.ID, friend.ID},
 				Messages:   []models.Message{},
 				FriendRoom: true,
 			}
 			_, err = roomCollection.InsertOne(database.Context, new_room) // insert new room in database
+			if err != nil {
+				log.Fatal(err)
+			}
 
+			// insert room into both user's lists
+			if err := roomCollection.FindOne(database.Context, bson.M{"name": user.UserName + friend.UserName}).Decode(&new_room); err != nil {
+				return err
+			}
+			new_rooms := append(user.Rooms, new_room.ID)
+			update_field = bson.D{primitive.E{Key: "rooms", Value: new_rooms}}
+			_, err = userCollection.UpdateOne(database.Context, bson.M{"_id": user.ID}, bson.D{
+				{"$set", update_field},
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			new_rooms = append(friend.Rooms, new_room.ID)
+			update_field = bson.D{primitive.E{Key: "rooms", Value: new_rooms}}
+			_, err = userCollection.UpdateOne(database.Context, bson.M{"_id": friend.ID}, bson.D{
+				{"$set", update_field},
+			})
 			if err != nil {
 				log.Fatal(err)
 			}
