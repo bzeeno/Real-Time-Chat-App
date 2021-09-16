@@ -1,0 +1,80 @@
+.friend {
+    display: flex;
+    flex-direction: column;
+    //border: 1px solid red;    
+    //border-radius: .3rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.img-large {
+    display: flex;
+    border-radius: .4rem;
+}
+
+.img-small{
+    display: flex;
+    border-radius: .4rem;
+    width: 50%;
+    height: 50%;
+    margin: 0 auto;
+}
+
+.friend-img {
+  width: 100%;
+  height: auto;
+}
+
+.friend-name {
+    display: flex;
+    color: white;
+    align-items: center;
+    justify-content: center;
+}
+
+.friend-container{
+    display: flex;
+  position: relative;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The overlay effect (full height and width) - lays on top of the container and over the image */
+.overlay.img-large {
+    display: flex;
+    justify-content: center;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: .3s ease;
+  background-color: #242424;
+}
+
+/* When you mouse over the container, fade in the overlay icon*/
+.friend-container:hover .overlay {
+  opacity: .75;
+}
+
+/* The icon inside the overlay is positioned in the middle vertically and horizontally */
+.icon {
+  color: white;
+  font-size: 100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* When you move the mouse over the icon, change color */
+.fa-user:hover {
+  color: #eee;
+}                        
+

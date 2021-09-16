@@ -1,0 +1,43 @@
+import React, {useState} from 'react'
+import {Link} from 'react-router-dom'
+import {SidebarData} from './SidebarData'
+import './Navbar.scss'
+
+export const Navbar = () => {
+    const [sidebar, setSidebar] = useState(false)
+    
+    const showSidebar = () => setSidebar(!sidebar)
+
+    return(
+        <>
+        <div className='navbar'>
+            <div className='container-fluid navbar-container'>
+                <Link to='/' className='nav-bars'>
+                    {/*<i classname="fas fa-atom fa-3x"/>*/}
+                    <i className="fas fa-bars fa-3x" onClick={showSidebar}/>
+                </Link>
+            </div>
+        </div>
+        <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
+            <ul className='nav-menu-items'>
+                <li className='nav-toggle'>
+                <Link to='/' className='navbar-logo'>
+                    {/*<i className="fas fa-atom fa-3x"/>*/}
+                    <i className="fas fa-times fa-3x"/>
+                </Link>
+                </li>
+                {SidebarData.map((item, index) => {
+                    return (
+                        <li key={index} className={item.className}>
+                            <Link to={item.path}>
+                                {item.icon}
+                                <span>{item.title}</span>
+                            </Link>
+                        </li>
+                    )
+                })}
+            </ul>
+        </nav>
+        </>
+    )
+}

@@ -1,0 +1,55 @@
+:root {
+    --primary:   #884DFF;
+    --secondary: #C4FF4D;
+}
+
+.btn {
+    //margin: 2rem 0rem 0rem;
+    border-radius: .3rem;
+    outline: none;
+    border: none;
+    cursor: pointer;
+}
+
+.btn--primary {
+    background-color: var(--primary);
+    color: white;
+    border: 1px solid var(--primary);
+}
+
+.btn--secondary {
+    background-color: var(--secondary);
+    color: #242424;
+    border: 1px solid var(--secondary);
+}
+
+.btn--outline {
+    background-color: transparent;
+    color: white;
+    padding: .5rem 1rem;
+    border: 1px solid var(--primary);
+
+}
+
+.btn--sm {
+    padding: 0;
+    height: 25%;
+    margin: .25rem auto;
+    font-size: 1rem;
+}
+
+.btn--med {
+    padding: .5rem 1rem;
+    font-size: 1rem;
+}
+
+.btn--lg {
+    padding: .5rem 2rem;
+    font-size: 1rem;
+}
+
+.overlay-btn {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+}

@@ -1,0 +1,19 @@
+.message {
+    border-radius: .3rem;
+    width: 100%;
+    min-height: 5rem;
+    padding: 0;
+}
+
+.not-current-user {
+    border: 1px solid #c4ff4d;    
+}
+
+.current-user {
+    border: 1px solid #884DFF;
+}
+
+.message-text {
+    color: white;
+}
+
