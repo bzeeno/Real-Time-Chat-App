@@ -54,6 +54,7 @@ func GetRoomInfo(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"room_name": room.Name,
 		"room_pic":  room.RoomPic,
+		"users":     room.People,
 	})
 
 }
