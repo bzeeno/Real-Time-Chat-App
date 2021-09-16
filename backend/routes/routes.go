@@ -29,5 +29,5 @@ func Setup(app *fiber.App) {
 	app.Post("/api/create-room", api.CreateRoom)
 	app.Post("/api/leave-room", api.LeaveRoom)
 	// Websocket
-	app.Get("/ws/:id", websocket.New(chat.Reader))
+	app.Get("/ws/:id", websocket.New(chat.Connect))
 }
