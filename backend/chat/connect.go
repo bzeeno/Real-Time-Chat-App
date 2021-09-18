@@ -17,6 +17,7 @@ var current_pools []*Pool
 
 func Connect(c *websocket.Conn) {
 	room_id, _ := primitive.ObjectIDFromHex(c.Params("id")) // get room id (which will also be pool id)
+	home_id, _ := primitive.ObjectIDFromHex("0")
 
 	// Get user who sent message
 	cookie := c.Cookies("jwt")
@@ -63,9 +64,13 @@ func Connect(c *websocket.Conn) {
 		go conn_pool.Listen() // go routine: Listen()
 	}
 
-	client := &Client{User: user.UserName, Conn: c, Pool: conn_pool} // create new client
-	conn_pool.Register <- client                                     // register client w/pool
-	client.Read()                                                    // read
+	client := &Client{ID: user.ID, User: user.UserName, Conn: c, Pool: conn_pool} // create new client
+	conn_pool.Register <- client                                                  // register client w/pool
+	if room_id == home_id {
+		client.ReadHome() // read
+	} else {
+		client.ReadMessage() // read
+	}
 }
 
 func Reader(c *websocket.Conn) {

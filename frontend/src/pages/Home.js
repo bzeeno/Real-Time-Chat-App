@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 //import {Button} from '../components/Button'
 import {useHistory} from 'react-router-dom'
 import {Preview} from '../components/Preview'
@@ -13,8 +13,13 @@ export const Home = (props) => {
     const [friends, setFriends] = useState('')
     const [rooms, setRooms] = useState('')
     const [requests, setRequests] = useState('')
+    const socket = useRef(null);
     const history = useHistory()
     let alert = false
+
+    if(!localStorage.getItem("user")) {
+        history.push('/login')
+    }
 
     const  showSearchWindow = () => setSearch(!search) // toggle search bar
     const  showRoomWindow = () => setCreateRoom(!createRoom) // toggle search bar
@@ -53,12 +58,24 @@ export const Home = (props) => {
         getFriends().catch(setFriends(''))
         getFriendReqs().catch(setRequests(''))
         getRooms().catch(setRooms(''))
+
+        socket.current = new WebSocket("ws://localhost:8000/ws/")
+
+        socket.current.onopen = (event) => {
+            console.log("Connection at: ", "ws://localhost:8000/ws/")
+        }
+        socket.current.onmessage = (msg) => {
+            let new_msg = JSON.parse(msg.data)
+            console.log(new_msg)
+        }
+        socket.current.onclose = (event) => {
+            console.log("socket closed connection: ", event)
+        }
+        
+        return () => socket.current.close()
         
     }, [])
 
-    if(!localStorage.getItem("user")) {
-        history.push('/login')
-    }
 
     return(
         <div className='container'>
@@ -69,9 +86,9 @@ export const Home = (props) => {
             <div className="search-window-container">
                 <Search search={search} setSearch={setSearch}/>
             </div>
-            <div className='row mx-1'>
+            <div className='row'>
                 {friends === null ? null : Object.keys(friends).map(key => 
-                    <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0'>
+                    <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3'>
                         <Preview alt='friend' size='img-large' isRoom={false} friend_id={friends[key]} />
                     </div>
                 )}
@@ -86,9 +103,9 @@ export const Home = (props) => {
             <div className="search-window-container">
                 <CreateRoom createRoom={createRoom} />
             </div>
-            <div className='row mx-1'>
+            <div className='row'>
                 {rooms === null ? null : Object.keys(rooms).map(key => 
-                    <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0'>
+                    <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3'>
                         <Preview alt='default_room.jpeg' size='img-large' isRoom={true} room_id={rooms[key]} />
                     </div>
                 )}
@@ -100,7 +117,7 @@ export const Home = (props) => {
             </div>
             <div className='row'>
                 {requests === null ? null : Object.keys(requests).map(key =>
-                    <div className='col-sm-12 col-md-4 col-lg-2 px-0' key={key}>
+                    <div className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3' key={key}>
                         <Preview src='default_pic.jpeg' alt='friend' size='img-large' name='username' isRoom={false} friend_id={requests[key]} setAlert={alert} />
                     </div>
                 )}

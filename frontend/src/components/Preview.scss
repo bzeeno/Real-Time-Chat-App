@@ -42,8 +42,6 @@
 
 /* The overlay effect (full height and width) - lays on top of the container and over the image */
 .overlay.img-large {
-    display: flex;
-    justify-content: center;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -78,3 +76,24 @@
   color: #eee;
 }                        
 
+.select-friend {
+    height: 2.5rem;
+    background-color: #884DFF;
+    margin-top: 3rem;    
+}
+
+.leave-btn {
+    margin-top: 6rem;
+}
+
+.invite-friend-label {
+    text: white;
+    margin-top: 2rem;
+    z-index: 100;
+}
+
+.overlay-btn {
+    display: flex;
+    min-width: 75%;
+    margin: 0 auto;
+}

@@ -17,7 +17,39 @@ type Client struct {
 	Pool *Pool
 }
 
-func (this *Client) Read() {
+type Request struct {
+	FriendID primitive.ObjectID `json:"friend_id" bson:"friend_id"`
+	Request  string             `json:"req" bson:"req"`
+}
+
+func (this *Client) ReadHome() {
+	defer func() {
+		this.Pool.Unregister <- this
+		this.Conn.Close()
+	}()
+
+	for {
+		var req Request
+		err := this.Conn.ReadJSON(req)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		new_req := Request{FriendID: req.FriendID, Request: req.Request} // request to send to friend
+
+		for client, _ := range this.Pool.Clients { // loop through clients connected to homepage
+			if client.ID == req.FriendID { // if friend is client
+				if err := client.Conn.WriteJSON(new_req); err != nil { // send request to friend
+					log.Println(err)
+					return
+				}
+			}
+		}
+	}
+}
+
+func (this *Client) ReadMessage() {
 	defer func() {
 		this.Pool.Unregister <- this
 		this.Conn.Close()
