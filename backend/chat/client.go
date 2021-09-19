@@ -18,8 +18,9 @@ type Client struct {
 }
 
 type Request struct {
-	FriendID primitive.ObjectID `json:"friend_id" bson:"friend_id"`
-	Request  string             `json:"req" bson:"req"`
+	FriendID string `json:"friend_id" bson:"friend_id"`
+	RoomID   string `json:"room_id" bson:"room_id"`
+	Request  string `json:"req" bson:"req"`
 }
 
 func (this *Client) ReadHome() {
@@ -31,28 +32,34 @@ func (this *Client) ReadHome() {
 	for {
 		// Read request from client 1
 		var req Request
-		_, msg, err := this.Conn.ReadMessage()
+		//_, msg, err := this.Conn.ReadMessage()
+		err := this.Conn.ReadJSON(&req)
 		//err = json.Unmarshal(msg, &req)
 		//err := this.Conn.ReadJSON(req)
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println("received request from home: ", string(msg))
+		log.Println("received request from home: ", req)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		new_req := Request{FriendID: req.FriendID, Request: req.Request} // request to send to clients
+		usr_id_str := this.ID.Hex()
+
+		new_req := Request{FriendID: req.FriendID, Request: req.Request} // request to send to clients, set friend_id to client who sent request
 		log.Println("new_req: ", new_req)
+
 		// send request to client 1
 		if err := this.Conn.WriteJSON(new_req); err != nil { // send request to friend
 			log.Println(err)
 		}
 
+		new_req = Request{FriendID: usr_id_str, Request: req.Request} // request to send to clients, set friend_id to client who sent request
 		// send request to client 2
+		friend_objID, _ := primitive.ObjectIDFromHex(req.FriendID)
 		for client, _ := range this.Pool.Clients { // loop through clients connected to homepage
-			if client.ID == req.FriendID { // if friend is client
+			if client.ID == friend_objID { // if friend is client
 				if err := client.Conn.WriteJSON(new_req); err != nil { // send request to friend
 					log.Println(err)
 					return

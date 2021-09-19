@@ -194,7 +194,7 @@ export const Preview = (props) => {
         const result = await response.json();
         console.log(result)
 
-        props.setReq({"friend_id": props.friend_id, "req": "add-to-room"})
+        props.setReq({"friend_id": props.friend_id, "room_id": props.room_id, "req": "add-to-room"})
         //window.location.reload()
     }
 
