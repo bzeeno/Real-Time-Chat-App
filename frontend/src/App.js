@@ -11,7 +11,8 @@ import {Room} from './pages/Room'
 
 function App() {
     const [user, setUser] = useState('')
-    const [sidebarData, setSidebarData] = useState(null)
+    const [room_id, setRoomID] = useState(null)
+    console.log("room_id in app.js: ", room_id)
 
     // Get user if logged in
     useEffect(() => {
@@ -30,20 +31,18 @@ function App() {
                 setUser(user)    // set user to retrieved user's user
             }
         }
-
-        
         fetchUser().catch(setUser('')) // get user, set to empty if cannot get user
     },[])
 
   return (
     <>
         <BrowserRouter>
-            <Navbar user={user} setUser={setUser} sidebarData={sidebarData}/>
-            <Route exact path='/'                  component={() => <Home user={user} setUser={setUser} setSidebarData={setSidebarData} />}/>
-            <Route path='/login'                   component={() => <Login user={user} setUser={setUser} setSidebarData={setSidebarData} />}/>
-            <Route path='/register'                component={() => <Register user={user} setSidebarData={setSidebarData} />} />
-            <Route exact path='/friend/:friend_id' component={() => <Friend user={user} isRoom={false} setSidebarData={setSidebarData} />} />
-            <Route exact path='/room/:room_id'     component={() => <Room user={user} isRoom={true} />} />
+            <Navbar user={user} setUser={setUser} room_id={room_id} />
+            <Route exact path='/'                  component={() => <Home user={user} setUser={setUser} setRoomID={room_id => setRoomID(room_id)}/>}/>
+            <Route path='/login'                   component={() => <Login user={user} setUser={setUser} />}/>
+            <Route path='/register'                component={() => <Register user={user} />} />
+            <Route exact path='/friend/:friend_id' component={() => <Friend user={user} isRoom={false} setRoomID={room_id => setRoomID(room_id)}/>} />
+            <Route exact path='/room/:room_id'     component={() => <Room user={user} isRoom={true} setRoomID={room_id => setRoomID(room_id)} />}/>
         </BrowserRouter>
 
     </>

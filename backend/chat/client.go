@@ -29,15 +29,28 @@ func (this *Client) ReadHome() {
 	}()
 
 	for {
+		// Read request from client 1
 		var req Request
-		err := this.Conn.ReadJSON(req)
+		_, msg, err := this.Conn.ReadMessage()
+		//err = json.Unmarshal(msg, &req)
+		//err := this.Conn.ReadJSON(req)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println("received request from home: ", string(msg))
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		new_req := Request{FriendID: req.FriendID, Request: req.Request} // request to send to friend
+		new_req := Request{FriendID: req.FriendID, Request: req.Request} // request to send to clients
+		log.Println("new_req: ", new_req)
+		// send request to client 1
+		if err := this.Conn.WriteJSON(new_req); err != nil { // send request to friend
+			log.Println(err)
+		}
 
+		// send request to client 2
 		for client, _ := range this.Pool.Clients { // loop through clients connected to homepage
 			if client.ID == req.FriendID { // if friend is client
 				if err := client.Conn.WriteJSON(new_req); err != nil { // send request to friend

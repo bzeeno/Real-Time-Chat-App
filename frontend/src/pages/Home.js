@@ -12,10 +12,12 @@ export const Home = (props) => {
     const [createRoom, setCreateRoom] = useState(false)
     const [friends, setFriends] = useState('')
     const [rooms, setRooms] = useState('')
-    const [requests, setRequests] = useState('')
+    const [requests, setRequests] = useState('') // friend requests
+    const [req, setReq] = useState(null) // websocket requests
     const socket = useRef(null);
     const history = useHistory()
     let alert = false
+    props.setRoomID(null)
 
     if(!localStorage.getItem("user")) {
         history.push('/login')
@@ -27,6 +29,7 @@ export const Home = (props) => {
     const roomClass = createRoom ? 'rotate-icon' : '';
 
     useEffect(() => {
+        let isMounted = true;
         const getFriends = async() => {
             const response = await fetch("http://localhost:8000/api/get-friends", {
                 headers: {'Content-Type': 'application/json'},
@@ -34,8 +37,9 @@ export const Home = (props) => {
             })
 
             const result = await response.json()
-            setFriends(result['friends']) 
-            console.log("friends: ",result['friends'])
+            if (isMounted) {
+                setFriends(result['friends']) 
+            }
         }
         const getFriendReqs = async() => {
             const response = await fetch("http://localhost:8000/api/get-friend-reqs", {
@@ -43,8 +47,9 @@ export const Home = (props) => {
                 credentials: 'include'
             })
             const result = await response.json()
-            setRequests(result['requests'])
-            console.log("requests: ",result['requests'])
+            if (isMounted) {
+                setRequests(result['requests'])
+            }
         }
         const getRooms = async() => {
             const response = await fetch("http://localhost:8000/api/get-rooms", {
@@ -53,16 +58,22 @@ export const Home = (props) => {
             })
 
             const result = await response.json()
-            setRooms(result['rooms']) 
+            if (isMounted) {
+                setRooms(result['rooms']) 
+            }
         }
-        getFriends().catch(setFriends(''))
-        getFriendReqs().catch(setRequests(''))
-        getRooms().catch(setRooms(''))
+
+        if (isMounted) {
+            getFriends().catch(setFriends(''))
+            getFriendReqs().catch(setRequests(''))
+            getRooms().catch(setRooms(''))
+        }
 
         socket.current = new WebSocket("ws://localhost:8000/ws/")
 
         socket.current.onopen = (event) => {
             console.log("Connection at: ", "ws://localhost:8000/ws/")
+            socket.current.send(JSON.stringify({friend_id: 0, req: "HELP ME"}))
         }
         socket.current.onmessage = (msg) => {
             let new_msg = JSON.parse(msg.data)
@@ -72,10 +83,12 @@ export const Home = (props) => {
             console.log("socket closed connection: ", event)
         }
         
-        return () => socket.current.close()
+        return () => { socket.current.close(); isMounted=false }
         
     }, [])
 
+    const sendReq = () => socket.current.send(req)
+    console.log("req in home: ", req)
 
     return(
         <div className='container'>
@@ -84,12 +97,12 @@ export const Home = (props) => {
                 <i className={`fas fa-plus-circle add-btn mb-0 ${searchClass}`} onClick={showSearchWindow} />
             </div>
             <div className="search-window-container">
-                <Search search={search} setSearch={setSearch}/>
+                <Search search={search} setSearch={setSearch} setReq={ data => setReq(data) } />
             </div>
             <div className='row'>
                 {friends === null ? null : Object.keys(friends).map(key => 
                     <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3'>
-                        <Preview alt='friend' size='img-large' isRoom={false} friend_id={friends[key]} />
+                        <Preview alt='friend' size='img-large' isRoom={false} friend_id={friends[key]} setReq={data => setReq(data)}/>
                     </div>
                 )}
 
@@ -106,7 +119,7 @@ export const Home = (props) => {
             <div className='row'>
                 {rooms === null ? null : Object.keys(rooms).map(key => 
                     <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3'>
-                        <Preview alt='default_room.jpeg' size='img-large' isRoom={true} room_id={rooms[key]} />
+                        <Preview alt='default_room.jpeg' size='img-large' isRoom={true} room_id={rooms[key]} setReq={data => setReq(data)} />
                     </div>
                 )}
             </div>
@@ -118,7 +131,7 @@ export const Home = (props) => {
             <div className='row'>
                 {requests === null ? null : Object.keys(requests).map(key =>
                     <div className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3' key={key}>
-                        <Preview src='default_pic.jpeg' alt='friend' size='img-large' name='username' isRoom={false} friend_id={requests[key]} setAlert={alert} />
+                        <Preview src='default_pic.jpeg' alt='friend' size='img-large' name='username' isRoom={false} friend_id={requests[key]} setAlert={alert} setReq={data => setReq(data)} />
                     </div>
                 )}
             </div>

@@ -9,32 +9,17 @@ export const Room = (props) => {
     const history = useHistory()
     const [msg, setMsg] = useState()
     const [messages, setMessages] = useState('')
-    const [users, setUsers] = useState([])
     const socket = useRef(null);
     // get room id
     let router_data = useParams()
     let room_id = router_data['room_id']
+    props.setRoomID(room_id)
 
     if (!localStorage.getItem("user")) {
         history.push('/login')
     }
 
     useEffect(() => {
-        const getRoomInfo = async () => {
-            const response = await fetch("http://localhost:8000/api/get-room-info", { // send post request to logout endpoint
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                credentials: 'include',
-                body: JSON.stringify({
-                    room_id: room_id
-                })
-            })
-            const result = await response.json()
-            console.log(result['users'])
-            setUsers(result['users'])
-        }
-        getRoomInfo()
-
         const getMessages = async() => {
             const response = await fetch("http://localhost:8000/api/get-messages", {
                 method: 'POST',
@@ -48,7 +33,7 @@ export const Room = (props) => {
             const result = await response.json()
             setMessages(result['messages']) 
         }
-
+        
         getMessages()
 
         socket.current = new WebSocket("ws://localhost:8000/ws/"+room_id)
@@ -69,9 +54,7 @@ export const Room = (props) => {
     }, [room_id])
 
 
-    const sendMsg = () => {
-        socket.current.send(msg)
-    }
+    const sendMsg = () => socket.current.send(msg)
 
     return (
         <div className='container room-friend-container'>

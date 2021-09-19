@@ -196,7 +196,6 @@ func AddFriend(c *fiber.Ctx) error {
 			}
 
 			/* Create chat room for just these 2 friends */
-
 			new_room := models.Room{
 				Name:       user.UserName + friend.UserName,
 				People:     []primitive.ObjectID{user.ID, friend.ID},
@@ -317,24 +316,56 @@ func RemoveFriend(c *fiber.Ctx) error {
 		log.Fatal(err)
 	}
 
-	// Delete their chat room
-	friend_id_str := friend.ID.Hex()
-	user_id_str := user.ID.Hex()
-	len_half_friend := len(friend_id_str) / 2
-	len_half_user := len(user_id_str) / 2
-	chat_name1 := user_id_str[len_half_user:] + friend_id_str[len_half_friend:]
-	chat_name2 := friend_id_str[len_half_friend:] + user_id_str[len_half_user:]
-	fmt.Println("chat_name1: ", chat_name1)
-	fmt.Println("chat_name2: ", chat_name2)
+	// Delete room from both users' lists
+	// 2 possible room names
+	chat_name1 := friend.UserName + user.UserName
+	chat_name2 := user.UserName + friend.UserName
+	var room models.Room
+	var room_id primitive.ObjectID
+	var i int
 
-	if _, err = roomCollection.DeleteOne(database.Context, bson.M{"name": chat_name1}); err != nil { // if name == chat_name1, delete
-		fmt.Println("not chat_name1")
-		if _, err = roomCollection.DeleteOne(database.Context, bson.M{"name": chat_name2}); err != nil { // if name == chat_name2, delete
-			fmt.Println("not chat_name2 either")
-			return c.JSON(fiber.Map{
-				"message": err,
-			})
+	// delete room from user's list
+	for i, room_id = range user.Rooms {
+		roomCollection.FindOne(database.Context, bson.M{"_id": room_id}).Decode(&room) // Get current room
+		if (room.Name == chat_name1) || (room.Name == chat_name2) {
+			user.Rooms = append(user.Rooms[:i], user.Rooms[i+1:]...)
+			break
 		}
+	}
+	update_field = bson.D{primitive.E{Key: "rooms", Value: user.Rooms}}
+	_, err = userCollection.UpdateOne(database.Context, bson.M{"_id": user.ID}, bson.D{
+		{"$set", update_field},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// delete room from friend's list
+	for j, friend_room_id := range friend.Rooms {
+		if friend_room_id == room_id {
+			friend.Rooms = append(friend.Rooms[:j], friend.Rooms[j+1:]...)
+			break
+		}
+	}
+	update_field = bson.D{primitive.E{Key: "rooms", Value: friend.Rooms}}
+	_, err = userCollection.UpdateOne(database.Context, bson.M{"_id": friend.ID}, bson.D{
+		{"$set", update_field},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Delete chat room
+	fmt.Println("chat names: ", chat_name1, " ", chat_name2)
+	if _, err = roomCollection.DeleteOne(database.Context, bson.M{"name": chat_name1}); err != nil { // if name == chat_name1, delete
+		return c.JSON(fiber.Map{
+			"message": err,
+		})
+	}
+	if _, err = roomCollection.DeleteOne(database.Context, bson.M{"name": chat_name2}); err != nil { // if name == chat_name2, delete
+		return c.JSON(fiber.Map{
+			"message": err,
+		})
 	}
 
 	return c.JSON(fiber.Map{

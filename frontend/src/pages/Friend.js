@@ -15,6 +15,7 @@ export const Friend = (props) => {
     //const room_id = useRef(null);
     const socket = useRef(null);
     //let socket = new WebSocket("ws://localhost:8000/ws/123")
+    props.setRoomID(null)
 
     let router_data = useParams()
     let friend_id = router_data['friend_id']

@@ -60,7 +60,6 @@ func Connect(c *websocket.Conn) {
 	if !found_pool {
 		conn_pool = NewPool(room_id) // create new pool
 		current_pools = append(current_pools, conn_pool)
-		log.Println(current_pools)
 		go conn_pool.Listen() // go routine: Listen()
 	}
 

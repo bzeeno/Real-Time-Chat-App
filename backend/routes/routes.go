@@ -26,6 +26,7 @@ func Setup(app *fiber.App) {
 	app.Get("/api/get-rooms", api.GetRooms)
 	app.Post("/api/get-messages", api.GetMessages)
 	app.Post("/api/get-room-info", api.GetRoomInfo)
+	app.Post("/api/add-to-room", api.AddToRoom)
 	app.Post("/api/create-room", api.CreateRoom)
 	app.Post("/api/leave-room", api.LeaveRoom)
 	// Websocket

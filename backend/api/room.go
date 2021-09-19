@@ -59,6 +59,59 @@ func GetRoomInfo(c *fiber.Ctx) error {
 
 }
 
+func AddToRoom(c *fiber.Ctx) error {
+	var data map[string]string
+	var room models.Room
+	var friend models.User
+	userCollection := database.DB.Collection("users")
+	roomCollection := database.DB.Collection("rooms")
+
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	friend_id, _ := primitive.ObjectIDFromHex(data["friend_id"])
+	room_id, _ := primitive.ObjectIDFromHex(data["room_id"])
+
+	// Get room
+	if err := roomCollection.FindOne(database.Context, bson.M{"_id": room_id}).Decode(&room); err != nil { // Get room with specified id
+		return err
+	}
+	// Get friend
+	if err := userCollection.FindOne(database.Context, bson.M{"_id": friend_id}).Decode(&friend); err != nil { // Get room with specified id
+		return err
+	}
+	for _, friend_room := range friend.Rooms {
+		if friend_room == room.ID {
+			return c.JSON(fiber.Map{
+				"message": "Friend is already in room",
+			})
+		}
+	}
+	// add room to friend's list
+	new_rooms := append(friend.Rooms, room_id)
+	update_field := bson.D{primitive.E{Key: "rooms", Value: new_rooms}}
+	_, err := userCollection.UpdateOne(database.Context, bson.M{"_id": friend_id}, bson.D{
+		{"$set", update_field},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// add friend to room
+	new_people := append(room.People, friend_id)
+	update_field = bson.D{primitive.E{Key: "people", Value: new_people}}
+	_, err = roomCollection.UpdateOne(database.Context, bson.M{"_id": room_id}, bson.D{
+		{"$set", update_field},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	return c.JSON(fiber.Map{
+		"message": "Successfully added friend to room",
+	})
+}
+
 // Create Room
 func CreateRoom(c *fiber.Ctx) error {
 	var data map[string]string

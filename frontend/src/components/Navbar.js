@@ -1,13 +1,35 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {Link, useHistory} from 'react-router-dom'
 import {Preview} from './Preview'
 import './Navbar.scss'
 
 export const Navbar = (props) => {
     const [sidebar, setSidebar] = useState(false)
+    const [users, setUsers] = useState([])
     const history = useHistory()
 
     const showSidebar = () => setSidebar(!sidebar) // toggle sidebar
+
+    useEffect(() => {
+        const getRoomInfo = async () => {
+            const response = await fetch("http://localhost:8000/api/get-room-info", { // send post request to logout endpoint
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify({
+                    room_id: props.room_id
+                })
+            })
+            const result = await response.json()
+            console.log(result['users'])
+            setUsers(result['users'])
+        }
+        if (props.room_id === null) {
+            setUsers([])
+        } else {
+            getRoomInfo()
+        }
+    }, [props.room_id])
 
     // logout function
     const logout = async () => {
@@ -53,6 +75,12 @@ export const Navbar = (props) => {
                             <span> Logout</span>
                         </Link>
                     </li>
+                    {users.length === 0 ? null : Object.keys(users).map(key => 
+                        <li key={key} className=''>
+                            <Preview alt='default.jpeg' size='img-small' isRoom={false} friend_id={users[key]} />
+                        </li>
+                    )}
+                    
                 </ul>
             </nav>
         </div>
