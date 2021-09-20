@@ -193,8 +193,9 @@ export const Preview = (props) => {
 
         const result = await response.json();
         console.log(result)
-
-        props.setReq({"sender_id": props.user['_id'], "friend_id": event.target.id, "room_id": props.room_id, "req": "add-to-room"})
+        if (result["message"] !== "Friend is already in room") {
+            props.setReq({"sender_id": props.user['_id'], "friend_id": event.target.id, "room_id": props.room_id, "req": "add-to-room"})
+        }
         //window.location.reload()
     }
 

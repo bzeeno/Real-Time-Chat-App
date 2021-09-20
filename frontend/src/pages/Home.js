@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, createRef} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import useStateWithCallback from 'use-state-with-callback';
 //import {Button} from '../components/Button'
 import {useHistory} from 'react-router-dom'
@@ -12,7 +12,7 @@ export const Home = (props) => {
     const [search, setSearch] = useState(false)
     const [createRoom, setCreateRoom] = useState(false)
     const [friends, setFriends] = useState('')
-    const [rooms, setRooms] = useState('')
+    const [rooms, setRooms] = useState([])
     const [requests, setRequests] = useState('') // friend requests
     const requestsRef = useRef();
     requestsRef.current = requests;
@@ -24,7 +24,6 @@ export const Home = (props) => {
     });
     const socket = useRef(null);
     const history = useHistory()
-    let alert = false
     props.setRoomID(null)
 
     if(!localStorage.getItem("user")) {
@@ -76,7 +75,7 @@ export const Home = (props) => {
         if (isMounted) {
             getFriends().catch(setFriends(''))
             getFriendReqs().catch(setRequests(''))
-            getRooms().catch(setRooms(''))
+            getRooms().catch(setRooms([]))
         }
 
         socket.current = new WebSocket("ws://localhost:8000/ws/")
@@ -135,7 +134,8 @@ export const Home = (props) => {
                     console.log("In add-to-room")
                     console.log("Is receiver: ", new_req['sender_id'] !== props.user['_id'])
                     if (new_req['sender_id'] !== props.user['_id']) {    // if this client is not the sender:
-                        setRooms(prev => [...prev, new_req['room_id']])    // setRequests with client who sent request
+                        window.location.reload();
+                        //setRooms(prev => [...prev, new_req['room_id']])    // setRequests with client who sent request (this doesn't work, very annoying)
                     }
                     break;
                 default:

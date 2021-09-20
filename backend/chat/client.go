@@ -50,14 +50,14 @@ func (this *Client) ReadHome() {
 		usr_id_str := this.ID.Hex()
 
 		new_req := Request{SenderID: req.SenderID, FriendID: req.FriendID, InPending: "false", Request: req.Request} // request to send to clients, set friend_id to client who sent request
-		log.Println("new_req: ", new_req)
 
 		// send request to client 1
 		if err := this.Conn.WriteJSON(new_req); err != nil { // send request to friend
 			log.Println(err)
 		}
 
-		new_req = Request{SenderID: req.SenderID, FriendID: usr_id_str, InPending: req.InPending, Request: req.Request} // request to send to clients, set friend_id to client who sent request
+		new_req = Request{SenderID: req.SenderID, FriendID: usr_id_str, InPending: req.InPending, Request: req.Request, RoomID: req.RoomID} // request to send to clients, set friend_id to client who sent request
+		log.Println("new_req: ", new_req)
 		// send request to client 2
 		friend_objID, _ := primitive.ObjectIDFromHex(req.FriendID)
 		for client, _ := range this.Pool.Clients { // loop through clients connected to homepage
