@@ -17,9 +17,9 @@ export const Home = (props) => {
     //const [req, setReq] = useState(null) // websocket requests
     const [req, setReq] = useStateWithCallback(null, req => {
         if (req !== null && socket.current.readyState === 1) {
-            console.log('socket readyState: ', socket.current.readyState)
             console.log("req in sendReq: ", req);
-            socket.current.send(req);
+            socket.current.send(JSON.stringify(req));
+            setReq(null);
         } 
     });
     const socket = useRef(null);
@@ -81,23 +81,49 @@ export const Home = (props) => {
 
         socket.current.onopen = (event) => {
             console.log("Connection at: ", "ws://localhost:8000/ws/")
-            //socket.current.send({'friend_id': '0', 'req': 'HELP ME'})
+            //socket.current.send(JSON.stringify({friend_id: 0+'', req: "HELP ME"}))
         }
         socket.current.onmessage = (request) => {
             let new_req = JSON.parse(request.data)
-            console.log("msg onmessage: ", new_req)
-            switch(new_req) {
+            console.log("received req: ", new_req)
+            switch(new_req['req']) {
                 case 'add-friend':
-                    setFriends(prev => [...prev, new_req['friend_id']])
+                    console.log("In add-friend")
+                    let filteredRequests = [];
+                    let isInRequests = false;
+                    // check if friend is in requests
+                    Object.keys(requests).map(key => {
+                        if (requests[key] !== req['friend_id']) { // if friend is not current request:
+                            filteredRequests.push(friends[key])   // add to array
+                        } else {
+                            isInRequests = true;                  // otherwise: set isInRequests to true
+                        }
+                        return requests[key]
+                    })
+                    if (isInRequests) {                                     // if friend in requests:
+                        setFriends(prev => [...prev, new_req['friend_id']]) // setFriends with newly added friend
+                        setRequests(filteredRequests)                       // setRequests to array without friend that was just added
+                    } else if (new_req['friend_id'] !== props.user['_id']) {// if not in requests and req was not sent by this client then, other client accepted friend request
+                        setRequests(prev => [...prev, new_req['friend_id']]) // setFriends with newly added friend
+                    } 
                     break;
                 case 'remove-friend':
-                    let filteredArray = friends.filter(item => item !== req['friend_id']);
+                    let filteredArray = [];
+                    Object.keys(friends).map(key => {
+                        console.log("friend: ", friends[key])
+                        if (friends[key] !== req['friend_id']) {
+                           filteredArray.push(friends[key])
+                        }
+                        return friends[key]
+                    })
                     setFriends(filteredArray)
                     break;
                 case 'add-to-room':
+                    console.log("In add-to-room")
                     setRooms(prev => [...prev, new_req['room_id']]); 
                     break;
                 default:
+                    setReq(null)
                     break;
             }
         }
@@ -106,10 +132,7 @@ export const Home = (props) => {
         }
         
         return () => { socket.current.close(); isMounted=false }
-        
-    }, [req])
-
-
+    }, [])
 
     const sendReq = () =>{ console.log("req in sendReq: ", req); socket.current.send(req); }
 

@@ -12,7 +12,6 @@ import {Room} from './pages/Room'
 function App() {
     const [user, setUser] = useState('')
     const [room_id, setRoomID] = useState(null)
-    console.log("room_id in app.js: ", room_id)
 
     // Get user if logged in
     useEffect(() => {
