@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, createRef} from 'react'
 import useStateWithCallback from 'use-state-with-callback';
 //import {Button} from '../components/Button'
 import {useHistory} from 'react-router-dom'
@@ -14,10 +14,10 @@ export const Home = (props) => {
     const [friends, setFriends] = useState('')
     const [rooms, setRooms] = useState('')
     const [requests, setRequests] = useState('') // friend requests
-    //const [req, setReq] = useState(null) // websocket requests
+    const requestsRef = useRef();
+    requestsRef.current = requests;
     const [req, setReq] = useStateWithCallback(null, req => {
         if (req !== null && socket.current.readyState === 1) {
-            console.log("req in sendReq: ", req);
             socket.current.send(JSON.stringify(req));
             setReq(null);
         } 
@@ -35,6 +35,8 @@ export const Home = (props) => {
     const  showRoomWindow = () => setCreateRoom(!createRoom) // toggle search bar
     const searchClass = search ? 'rotate-icon' : '';
     const roomClass = createRoom ? 'rotate-icon' : '';
+
+    console.log("requests in home: ", requests)
 
     useEffect(() => {
         let isMounted = true;
@@ -85,33 +87,44 @@ export const Home = (props) => {
         }
         socket.current.onmessage = (request) => {
             let new_req = JSON.parse(request.data)
-            console.log("received req: ", new_req)
+            console.log("requests: ", requests)
             switch(new_req['req']) {
                 case 'add-friend':
-                    console.log("In add-friend")
+                    console.log("requests: ", requestsRef.current)
                     let filteredRequests = [];
                     let isInRequests = false;
                     // check if friend is in requests
-                    Object.keys(requests).map(key => {
-                        if (requests[key] !== req['friend_id']) { // if friend is not current request:
-                            filteredRequests.push(friends[key])   // add to array
+                    Object.keys(requestsRef.current).map(key => {
+                        if (requestsRef.current[key] !== new_req['friend_id']) { // if friend is not current request:
+                            filteredRequests.push(requests[key])   // add to array
                         } else {
                             isInRequests = true;                  // otherwise: set isInRequests to true
                         }
-                        return requests[key]
+                        return requestsRef.current[key]
                     })
-                    if (isInRequests) {                                     // if friend in requests:
-                        setFriends(prev => [...prev, new_req['friend_id']]) // setFriends with newly added friend
-                        setRequests(filteredRequests)                       // setRequests to array without friend that was just added
-                    } else if (new_req['friend_id'] !== props.user['_id']) {// if not in requests and req was not sent by this client then, other client accepted friend request
-                        setRequests(prev => [...prev, new_req['friend_id']]) // setFriends with newly added friend
-                    } 
+                    console.log("isInRequests: ", isInRequests)
+                    if (new_req['sender_id'] === props.user['_id']) {           // if this client is the sender:
+                        if(isInRequests) {                                          // if accepting friend request:
+                            console.log("Accepting friend request")
+                            console.log("new requests: ", filteredRequests)
+                            setRequests(filteredRequests)                               // setRequests to array without friend that was just added
+                            setFriends(prev => [...prev, new_req['friend_id']])         // setFriends with newly added friend
+                        }                                                       
+                    } else {                                                    // if this client is the receiver:
+                        if(new_req['in_pending'] === 'true') {                      // if other client accepted friend request:
+                            console.log("Friend accepted request")
+                            setFriends(prev => [...prev, new_req['friend_id']])         // setFriends with newly added friend
+                        } else {                                                // if received friend request from other client:
+                            console.log("Received friend request")
+                            setRequests(prev => [...prev, new_req['friend_id']])    // setRequests with client who sent request
+                        }
+                    }
                     break;
                 case 'remove-friend':
                     let filteredArray = [];
                     Object.keys(friends).map(key => {
                         console.log("friend: ", friends[key])
-                        if (friends[key] !== req['friend_id']) {
+                        if (friends[key] !== new_req['friend_id']) {
                            filteredArray.push(friends[key])
                         }
                         return friends[key]
@@ -120,7 +133,10 @@ export const Home = (props) => {
                     break;
                 case 'add-to-room':
                     console.log("In add-to-room")
-                    setRooms(prev => [...prev, new_req['room_id']]); 
+                    console.log("Is receiver: ", new_req['sender_id'] !== props.user['_id'])
+                    if (new_req['sender_id'] !== props.user['_id']) {    // if this client is not the sender:
+                        setRooms(prev => [...prev, new_req['room_id']])    // setRequests with client who sent request
+                    }
                     break;
                 default:
                     setReq(null)
@@ -134,9 +150,9 @@ export const Home = (props) => {
         return () => { socket.current.close(); isMounted=false }
     }, [])
 
-    const sendReq = () =>{ console.log("req in sendReq: ", req); socket.current.send(req); }
+    //const sendReq = () =>{ console.log("req in sendReq: ", req); socket.current.send(req); }
 
-    console.log("req in home: ", req)
+    //console.log("req in home: ", req)
 
     return(
         <div className='container'>
@@ -145,12 +161,12 @@ export const Home = (props) => {
                 <i className={`fas fa-plus-circle add-btn mb-0 ${searchClass}`} onClick={showSearchWindow} />
             </div>
             <div className="search-window-container">
-                <Search search={search} setSearch={setSearch} setReq={ data => {setReq(data);} } />
+                <Search search={search} setSearch={setSearch} setReq={ data => {setReq(data);} } user={props.user} />
             </div>
             <div className='row'>
                 {friends === null ? null : Object.keys(friends).map(key => 
                     <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3'>
-                        <Preview alt='friend' size='img-large' isRoom={false} friend_id={friends[key]} setReq={ data => {setReq(data);} }/>
+                        <Preview alt='friend' size='img-large' isRoom={false} friend_id={friends[key]} setReq={ data => {setReq(data);} } user={props.user} inPending={false} overlay={true} />
                     </div>
                 )}
 
@@ -167,7 +183,7 @@ export const Home = (props) => {
             <div className='row'>
                 {rooms === null ? null : Object.keys(rooms).map(key => 
                     <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3'>
-                        <Preview alt='default_room.jpeg' size='img-large' isRoom={true} room_id={rooms[key]} setReq={ data => {setReq(data);} } />
+                        <Preview alt='default_room.jpeg' size='img-large' isRoom={true} room_id={rooms[key]} setReq={ data => {setReq(data);} } user={props.user} overlay={true} />
                     </div>
                 )}
             </div>
@@ -179,7 +195,7 @@ export const Home = (props) => {
             <div className='row'>
                 {requests === null ? null : Object.keys(requests).map(key =>
                     <div className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3' key={key}>
-                        <Preview src='default_pic.jpeg' alt='friend' size='img-large' name='username' isRoom={false} friend_id={requests[key]} setAlert={alert} setReq={ data => {setReq(data);} } />
+                        <Preview src='default_pic.jpeg' alt='friend' size='img-large' name='username' isRoom={false} friend_id={requests[key]} setReq={ data => {setReq(data);} } user={props.user} inPending={true} overlay={true} />
                     </div>
                 )}
             </div>

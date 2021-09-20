@@ -133,7 +133,7 @@ export const Preview = (props) => {
         })
 
         const result = await response.json();
-        props.setReq({"friend_id": props.friend_id, "req": "add-friend"})
+        props.setReq({"sender_id": props.user['_id'], "friend_id": props.friend_id, "req": "add-friend", "in_pending":props.inPending.toString()})
 
         //window.location.reload()
     }
@@ -150,7 +150,7 @@ export const Preview = (props) => {
 
         const result = await response.json()
         console.log(result);
-        props.setReq({"friend_id": props.friend_id, "req": "remove-friend"})
+        props.setReq({"sender_id": props.user['_id'], "friend_id": props.friend_id, "req": "remove-friend"})
 
         //history.push('/')
         //window.location.reload();
@@ -194,7 +194,7 @@ export const Preview = (props) => {
         const result = await response.json();
         console.log(result)
 
-        props.setReq({"friend_id": props.friend_id, "room_id": props.room_id, "req": "add-to-room"})
+        props.setReq({"sender_id": props.user['_id'], "friend_id": event.target.id, "room_id": props.room_id, "req": "add-to-room"})
         //window.location.reload()
     }
 
@@ -203,7 +203,8 @@ export const Preview = (props) => {
         <div>
             <div className='friend-container mt-2' id={props.id}>
                 <img src={'../'+previewPic} alt='friend' className={`${getImgSize}`} id={props.id} />
-                { !props.isRoom ? // if preview for friend:
+                { props.overlay ?
+                    !props.isRoom ? // if preview for friend:
                         getImgSize === 'img-large' ? // if image is large:
                         <div className={`overlay ${getImgSize}`}>  
                         <div className='col'>
@@ -252,7 +253,7 @@ export const Preview = (props) => {
                             </Menu>
                             <Button style={{margin: '0 auto', display: "flex"}} variant='contained' color='error' className='overlay-btn mt-2' onClick={leaveRoom}>Leave Room</Button>
                     </div>
-                </div>}
+                </div> : null } {/* if no overlay, set to null */}
 
         </div>
 

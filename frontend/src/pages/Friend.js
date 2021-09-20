@@ -81,7 +81,7 @@ export const Friend = (props) => {
     return (
         <div className='container room-friend-container'>
             <div className='row mt-5'>
-                <Preview alt='friend' size='img-large' isRoom={false} friend_id={friend_id} />
+                <Preview alt='friend' size='img-large' isRoom={false} friend_id={friend_id} overlay={false} />
             </div>
 
             <div className='row'>

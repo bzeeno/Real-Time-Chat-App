@@ -52,7 +52,7 @@ export const Search = (props) => {
                 {error === '' ? null : <li className='search-result'>{error}</li>}
                 {receivedData ? Object.keys(data).map(key => 
                     <li key={key} className='search-result'>
-                        <Preview src={data[key]['profile_pic']} alt='friend' size='img-large' name={data[key]['username']} friend_id={data[key]['_id']} setReq={data => props.setReq(data) }/>
+                        <Preview src={data[key]['profile_pic']} alt='friend' size='img-large' name={data[key]['username']} friend_id={data[key]['_id']} setReq={data => props.setReq(data) } user={props.user} inPending={false} overlay={true} />
                     </li>
                 )
                 : null}

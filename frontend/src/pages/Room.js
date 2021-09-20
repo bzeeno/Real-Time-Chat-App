@@ -59,7 +59,7 @@ export const Room = (props) => {
     return (
         <div className='container room-friend-container'>
             <div className='row mt-5'>
-                <Preview alt='room' size='img-large' isRoom={true} room_id={room_id} />
+                <Preview alt='room' size='img-large' isRoom={true} room_id={room_id} overlay={false} />
             </div>
             <div className='row'>
                 {messages.length === 0 ? null : Object.keys(messages).map(key => 
