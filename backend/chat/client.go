@@ -18,9 +18,11 @@ type Client struct {
 }
 
 type Request struct {
-	FriendID string `json:"friend_id" bson:"friend_id"`
-	RoomID   string `json:"room_id" bson:"room_id"`
-	Request  string `json:"req" bson:"req"`
+	SenderID  string `json:"sender_id" bson:"sender_id"`
+	FriendID  string `json:"friend_id" bson:"friend_id"`
+	RoomID    string `json:"room_id" bson:"room_id"`
+	InPending string `json:"in_pending" bson:"in_pending"`
+	Request   string `json:"req" bson:"req"`
 }
 
 func (this *Client) ReadHome() {
@@ -47,7 +49,7 @@ func (this *Client) ReadHome() {
 
 		usr_id_str := this.ID.Hex()
 
-		new_req := Request{FriendID: req.FriendID, Request: req.Request} // request to send to clients, set friend_id to client who sent request
+		new_req := Request{SenderID: req.SenderID, FriendID: req.FriendID, InPending: "false", Request: req.Request} // request to send to clients, set friend_id to client who sent request
 		log.Println("new_req: ", new_req)
 
 		// send request to client 1
@@ -55,7 +57,7 @@ func (this *Client) ReadHome() {
 			log.Println(err)
 		}
 
-		new_req = Request{FriendID: usr_id_str, Request: req.Request} // request to send to clients, set friend_id to client who sent request
+		new_req = Request{SenderID: req.SenderID, FriendID: usr_id_str, InPending: req.InPending, Request: req.Request} // request to send to clients, set friend_id to client who sent request
 		// send request to client 2
 		friend_objID, _ := primitive.ObjectIDFromHex(req.FriendID)
 		for client, _ := range this.Pool.Clients { // loop through clients connected to homepage
