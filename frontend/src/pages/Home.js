@@ -81,7 +81,7 @@ export const Home = (props) => {
 
         socket.current.onopen = (event) => {
             console.log("Connection at: ", "ws://localhost:8000/ws/")
-            socket.current.send({'friend_id': '0', 'req': 'HELP ME'})
+            //socket.current.send({'friend_id': '0', 'req': 'HELP ME'})
         }
         socket.current.onmessage = (request) => {
             let new_req = JSON.parse(request.data)
