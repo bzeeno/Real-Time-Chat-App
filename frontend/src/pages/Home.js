@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
+import useStateWithCallback from 'use-state-with-callback';
 //import {Button} from '../components/Button'
 import {useHistory} from 'react-router-dom'
 import {Preview} from '../components/Preview'
@@ -13,7 +14,14 @@ export const Home = (props) => {
     const [friends, setFriends] = useState('')
     const [rooms, setRooms] = useState('')
     const [requests, setRequests] = useState('') // friend requests
-    const [req, setReq] = useState(null) // websocket requests
+    //const [req, setReq] = useState(null) // websocket requests
+    const [req, setReq] = useStateWithCallback(null, req => {
+        if (req !== null && socket.current.readyState === 1) {
+            console.log('socket readyState: ', socket.current.readyState)
+            console.log("req in sendReq: ", req);
+            socket.current.send(req);
+        } 
+    });
     const socket = useRef(null);
     const history = useHistory()
     let alert = false
@@ -73,7 +81,7 @@ export const Home = (props) => {
 
         socket.current.onopen = (event) => {
             console.log("Connection at: ", "ws://localhost:8000/ws/")
-            socket.current.send({'friend_id': 0+'', 'req': 'HELP ME'})
+            socket.current.send({'friend_id': '0', 'req': 'HELP ME'})
         }
         socket.current.onmessage = (request) => {
             let new_req = JSON.parse(request.data)
@@ -99,9 +107,12 @@ export const Home = (props) => {
         
         return () => { socket.current.close(); isMounted=false }
         
-    }, [])
+    }, [req])
 
-    const sendReq = () => socket.current.send(req)
+
+
+    const sendReq = () =>{ console.log("req in sendReq: ", req); socket.current.send(req); }
+
     console.log("req in home: ", req)
 
     return(
@@ -111,12 +122,12 @@ export const Home = (props) => {
                 <i className={`fas fa-plus-circle add-btn mb-0 ${searchClass}`} onClick={showSearchWindow} />
             </div>
             <div className="search-window-container">
-                <Search search={search} setSearch={setSearch} setReq={ data => setReq(data) } />
+                <Search search={search} setSearch={setSearch} setReq={ data => {setReq(data);} } />
             </div>
             <div className='row'>
                 {friends === null ? null : Object.keys(friends).map(key => 
                     <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3'>
-                        <Preview alt='friend' size='img-large' isRoom={false} friend_id={friends[key]} setReq={data => setReq(data)}/>
+                        <Preview alt='friend' size='img-large' isRoom={false} friend_id={friends[key]} setReq={ data => {setReq(data);} }/>
                     </div>
                 )}
 
@@ -133,7 +144,7 @@ export const Home = (props) => {
             <div className='row'>
                 {rooms === null ? null : Object.keys(rooms).map(key => 
                     <div key={key} className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3'>
-                        <Preview alt='default_room.jpeg' size='img-large' isRoom={true} room_id={rooms[key]} setReq={data => setReq(data)} />
+                        <Preview alt='default_room.jpeg' size='img-large' isRoom={true} room_id={rooms[key]} setReq={ data => {setReq(data);} } />
                     </div>
                 )}
             </div>
@@ -145,7 +156,7 @@ export const Home = (props) => {
             <div className='row'>
                 {requests === null ? null : Object.keys(requests).map(key =>
                     <div className='col-sm-12 col-md-4 col-lg-2 px-0 mx-3' key={key}>
-                        <Preview src='default_pic.jpeg' alt='friend' size='img-large' name='username' isRoom={false} friend_id={requests[key]} setAlert={alert} setReq={data => setReq(data)} />
+                        <Preview src='default_pic.jpeg' alt='friend' size='img-large' name='username' isRoom={false} friend_id={requests[key]} setAlert={alert} setReq={ data => {setReq(data);} } />
                     </div>
                 )}
             </div>
