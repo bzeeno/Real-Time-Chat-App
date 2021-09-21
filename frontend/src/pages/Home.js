@@ -9,9 +9,12 @@ import {CreateRoom} from '../components/CreateRoom'
 import './Home.scss'
 
 export const Home = (props) => {
+    /*
     const socket = new WebSocket("ws://localhost:8000/ws/")
     const socketRef = useRef();
     socketRef.current = socket;
+    */
+    const socket = useRef(null);
 
     const [search, setSearch] = useState(false)
     const [createRoom, setCreateRoom] = useState(false)
@@ -81,11 +84,12 @@ export const Home = (props) => {
             getRooms().catch(setRooms([]))
         }
 
-        socketRef.current.onopen = (event) => {
+        socket.current = new WebSocket("ws://localhost:8000/ws")
+        socket.current.onopen = (event) => {
             console.log("Connection at: ", "ws://localhost:8000/ws/")
             //socket.current.send(JSON.stringify({friend_id: 0+'', req: "HELP ME"}))
         }
-        socketRef.current.onmessage = (request) => {
+        socket.current.onmessage = (request) => {
             let new_req = JSON.parse(request.data)
             console.log("requests: ", requests)
             switch(new_req['req']) {
@@ -129,6 +133,7 @@ export const Home = (props) => {
                         }
                         return friends[key]
                     })
+                    console.log("filtered array: ", filteredArray)
                     setFriends(filteredArray)
                     break;
                 case 'add-to-room':
@@ -145,7 +150,7 @@ export const Home = (props) => {
             }
         }
 
-        socketRef.current.onclose = (event) => {
+        socket.current.onclose = (event) => {
             console.log("socket closed connection: ", event)
         }
 
