@@ -8,12 +8,16 @@ import './RoomFriend.scss'
 //const socket = new WebSocket("ws://localhost:8000/ws/234");
 
 export const Friend = (props) => {
+    const socket = new WebSocket("ws://localhost:8000/ws/")
+    const socketRef = useRef();
+    socketRef.current = socket;
+
     const history = useHistory()
     const [msg, setMsg] = useState()
     const [messages, setMessages] = useState([])
     const [room_id, setRoomId] = useState('');
     //const room_id = useRef(null);
-    const socket = useRef(null);
+    //const socket = useRef(null);
     //let socket = new WebSocket("ws://localhost:8000/ws/123")
     props.setRoomID(null)
 
@@ -56,26 +60,23 @@ export const Friend = (props) => {
         getFriendChat()
         getMessages()
 
-        socket.current = new WebSocket("ws://localhost:8000/ws/"+room_id)
+        socketRef.current = new WebSocket("ws://localhost:8000/ws/"+room_id)
 
-        socket.current.onopen = (event) => {
+        socketRef.current.onopen = (event) => {
             console.log("Connection at: ", "ws://localhost:8000/ws/"+room_id)
         }
-        socket.current.onmessage = (msg) => {
+        socketRef.current.onmessage = (msg) => {
             let new_msg = JSON.parse(msg.data)
             console.log(new_msg)
             setMessages(prev => [...prev, new_msg])
         }
-        socket.current.onclose = (event) => {
+        socketRef.current.onclose = (event) => {
             console.log("socket closed connection: ", event)
         }
-        
-        return () => socket.current.close()
-
     },[friend_id, room_id])
 
     const sendMsg = () => {
-        socket.current.send(msg)
+        socketRef.current.send(msg)
     }
 
     return (

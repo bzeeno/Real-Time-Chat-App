@@ -9,6 +9,10 @@ import {CreateRoom} from '../components/CreateRoom'
 import './Home.scss'
 
 export const Home = (props) => {
+    const socket = new WebSocket("ws://localhost:8000/ws/")
+    const socketRef = useRef();
+    socketRef.current = socket;
+
     const [search, setSearch] = useState(false)
     const [createRoom, setCreateRoom] = useState(false)
     const [friends, setFriends] = useState('')
@@ -22,7 +26,6 @@ export const Home = (props) => {
             setReq(null);
         } 
     });
-    const socket = useRef(null);
     const history = useHistory()
     props.setRoomID(null)
 
@@ -78,13 +81,11 @@ export const Home = (props) => {
             getRooms().catch(setRooms([]))
         }
 
-        socket.current = new WebSocket("ws://localhost:8000/ws/")
-
-        socket.current.onopen = (event) => {
+        socketRef.current.onopen = (event) => {
             console.log("Connection at: ", "ws://localhost:8000/ws/")
             //socket.current.send(JSON.stringify({friend_id: 0+'', req: "HELP ME"}))
         }
-        socket.current.onmessage = (request) => {
+        socketRef.current.onmessage = (request) => {
             let new_req = JSON.parse(request.data)
             console.log("requests: ", requests)
             switch(new_req['req']) {
@@ -143,11 +144,12 @@ export const Home = (props) => {
                     break;
             }
         }
-        socket.current.onclose = (event) => {
+
+        socketRef.current.onclose = (event) => {
             console.log("socket closed connection: ", event)
         }
-        
-        return () => { socket.current.close(); isMounted=false }
+
+        return () => { isMounted=false }
     }, [])
 
     //const sendReq = () =>{ console.log("req in sendReq: ", req); socket.current.send(req); }

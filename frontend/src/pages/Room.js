@@ -6,10 +6,13 @@ import {MessageBox} from '../components/MessageBox'
 import './RoomFriend.scss'
 
 export const Room = (props) => {
+    const socket = new WebSocket("ws://localhost:8000/ws/")
+    const socketRef = useRef();
+    socketRef.current = socket;
+
     const history = useHistory()
     const [msg, setMsg] = useState()
     const [messages, setMessages] = useState('')
-    const socket = useRef(null);
     // get room id
     let router_data = useParams()
     let room_id = router_data['room_id']
@@ -36,25 +39,21 @@ export const Room = (props) => {
         
         getMessages()
 
-        socket.current = new WebSocket("ws://localhost:8000/ws/"+room_id)
-
-        socket.current.onopen = (event) => {
+        socketRef.current.onopen = (event) => {
             console.log("Connection at: ", "ws://localhost:8000/ws/"+room_id)
         }
-        socket.current.onmessage = (msg) => {
+        socketRef.current.onmessage = (msg) => {
             let new_msg = JSON.parse(msg.data)
             console.log(new_msg)
             setMessages(prev => [...prev, new_msg])
         }
-        socket.current.onclose = (event) => {
+        socketRef.current.onclose = (event) => {
             console.log("socket closed connection: ", event)
         }
-        
-        return () => socket.current.close()
     }, [room_id])
 
 
-    const sendMsg = () => socket.current.send(msg)
+    const sendMsg = () => socketRef.current.send(msg)
 
     return (
         <div className='container room-friend-container'>
