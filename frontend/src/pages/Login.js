@@ -18,7 +18,7 @@ export const Login = (props) => {
     const submit = async(e: SyntheticEvent) => {
         e.preventDefault()
 
-        const response = await fetch("http://localhost:8000/api/login", { // send post request to login endpoint
+        const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/login`, { // send post request to login endpoint
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',

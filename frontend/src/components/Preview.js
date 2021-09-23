@@ -34,7 +34,7 @@ export const Preview = (props) => {
     useEffect(() => {
         let isMounted = true
         const getFriends = async() => {
-            const response = await fetch("http://localhost:8000/api/get-friends", {
+            const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/get-friends`, {
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include'
             })
@@ -46,7 +46,7 @@ export const Preview = (props) => {
         }
 
         const checkFriend = async () => {
-            const response = await fetch("http://localhost:8000/api/check-friend", { // send post request to logout endpoint
+            const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/check-friend`, { // send post request to logout endpoint
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include',
@@ -66,7 +66,7 @@ export const Preview = (props) => {
             }
         }
         const getFriendInfo = async () => {
-            const response = await fetch("http://localhost:8000/api/get-friend-info", { // send post request to logout endpoint
+            const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/get-friend-info`, { // send post request to logout endpoint
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include',
@@ -87,7 +87,7 @@ export const Preview = (props) => {
             }
         }
         const getRoomInfo = async () => {
-            const response = await fetch("http://localhost:8000/api/get-room-info", { // send post request to logout endpoint
+            const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/get-room-info`, { // send post request to logout endpoint
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include',
@@ -123,7 +123,7 @@ export const Preview = (props) => {
     }, [props.friend_id, props.room_id, props.isRoom])
 
     const addFriend = async() => {
-        const response = await fetch("http://localhost:8000/api/add-friend", { // send post request to logout endpoint
+        const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/add-friend`, { // send post request to logout endpoint
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
@@ -139,7 +139,7 @@ export const Preview = (props) => {
     }
 
     const removeFriend = async() => {
-        const response = await fetch("http://localhost:8000/api/remove-friend", { // send post request to logout endpoint
+        const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/remove-friend`, { // send post request to logout endpoint
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
@@ -162,7 +162,7 @@ export const Preview = (props) => {
     }
 
     const leaveRoom = async() => {
-        const response = await fetch("http://localhost:8000/api/leave-room", { // send post request to logout endpoint
+        const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/leave-room`, { // send post request to logout endpoint
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',
@@ -181,7 +181,7 @@ export const Preview = (props) => {
     const sendRoomInvite = async(event) => {
         console.log('event target: ', event.target)
         console.log('event target value: ', event.target.id)
-        const response = await fetch("http://localhost:8000/api/add-to-room", { // send post request to logout endpoint
+        const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/add-to-room`, { // send post request to logout endpoint
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include',

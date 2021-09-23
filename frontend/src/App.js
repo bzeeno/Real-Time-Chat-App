@@ -16,7 +16,7 @@ function App() {
     // Get user if logged in
     useEffect(() => {
         const fetchUser = async() => {
-            const response = await fetch("http://localhost:8000/api/getuser", {
+            const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/getuser`, {
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include'
             })

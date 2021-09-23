@@ -46,7 +46,7 @@ export const Home = (props) => {
     useEffect(() => {
         let isMounted = true;
         const getFriends = async() => {
-            const response = await fetch("http://localhost:8000/api/get-friends", {
+            const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/get-friends`, {
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include'
             })
@@ -57,7 +57,7 @@ export const Home = (props) => {
             }
         }
         const getFriendReqs = async() => {
-            const response = await fetch("http://localhost:8000/api/get-friend-reqs", {
+            const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/get-friend-reqs`, {
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include'
             })
@@ -67,7 +67,7 @@ export const Home = (props) => {
             }
         }
         const getRooms = async() => {
-            const response = await fetch("http://localhost:8000/api/get-rooms", {
+            const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/get-rooms`, {
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include'
             })
@@ -84,9 +84,9 @@ export const Home = (props) => {
             getRooms().catch(setRooms([]))
         }
 
-        socket.current = new WebSocket("ws://localhost:8000/ws")
+        socket.current = new WebSocket(`ws://${process.env.REACT_APP_SERVER_URL}/ws`)
         socket.current.onopen = (event) => {
-            console.log("Connection at: ", "ws://localhost:8000/ws/")
+            console.log("Connected to ws")
             //socket.current.send(JSON.stringify({friend_id: 0+'', req: "HELP ME"}))
         }
         socket.current.onmessage = (request) => {

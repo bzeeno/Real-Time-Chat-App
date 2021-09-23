@@ -23,7 +23,7 @@ export const Register = (props) => {
         e.preventDefault()
         // if passwords match and email has @ char
         if (!error) {
-            await fetch("http://localhost:8000/api/register", { // send post request to register endpoint
+            await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/register`, { // send post request to register endpoint
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({

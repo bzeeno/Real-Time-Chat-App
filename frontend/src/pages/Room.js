@@ -27,7 +27,7 @@ export const Room = (props) => {
 
     useEffect(() => {
         const getMessages = async() => {
-            const response = await fetch("http://localhost:8000/api/get-messages", {
+            const response = await fetch(`http://${process.env.REACT_APP_SERVER_URL}/api/get-messages`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include',
@@ -43,9 +43,9 @@ export const Room = (props) => {
         getMessages()
 
         
-        socket.current = new WebSocket("ws://localhost:8000/ws/"+room_id)
+        socket.current = new WebSocket(`ws://${process.env.REACT_APP_SERVER_URL}/ws/`+room_id)
         socket.current.onopen = (event) => {
-            console.log("Connection at: ", "ws://localhost:8000/ws/"+room_id)
+            console.log("Connection at: ", room_id)
         }
         socket.current.onmessage = (msg) => {
             let new_msg = JSON.parse(msg.data)
