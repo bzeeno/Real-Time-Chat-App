@@ -22,6 +22,15 @@ Table of Contents
      * [pool.go](#pool.go)
 * [Client](#client)
   * [Client Directory Structure](#client-directory-structure)
+  * [App](#app)
+  * [Components](#components)
+    * [Button](#button)
+    * [CreateRoom](#create-room)
+    * [MessageBox](#message-box)
+    * [Message](#message)
+    * [Navbar](#navbar)
+    * [Preview](#preview)
+    * [Search](#search)
       
 ## Introduction
 This web application allows users to communicate in real-time with other users. Users can add friends and create rooms on the homepage. Data is sent to and received
@@ -172,8 +181,6 @@ the message is saved in the database.
 |   |   ├── Button.scss
 |   |   ├── CreateRoom.js
 |   |   ├── CreateRoom.scss
-|   |   ├── Dropdown.js
-|   |   ├── Dropdown.scss
 |   |   ├── MessageBox.js
 |   |   ├── MessageBox.scss
 |   |   ├── Message.js
@@ -196,3 +203,27 @@ the message is saved in the database.
 |      └── Room.js 
 └── ...
 </pre>
+
+### App
+- Contains method to get user authentication through api and store user in local storage
+- Contains routes for all pages and navbar
+
+### Components
+#### Button
+- A simple button used for the login and register pages
+#### CreateRoom
+- Dropdown menu for creating a new room
+#### MessageBox
+- The text field and button for sending messages
+#### Message
+- The message that gets displayed in rooms. Contains the user who sent it and the text itself
+#### Navbar
+- Navbar that pops out when hamburger menu is clicked. 
+- Contains link to Home page and to logout
+- In addition, if user is currently in room, the navbar will display all users in room
+#### Preview
+- A preview of either friend or room
+- Contains 2 sizes, the small size does not have an overlay and is only used in the navbar
+- The larger size does have an overlay to display different buttons depending on if the users are both friends or if the preview is for a room
+#### Search
+- The dropdown menu for searching for users
