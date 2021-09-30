@@ -5,23 +5,23 @@ Real-time communication is done through websockets and the client requests data 
 Table of Contents
 =================
 
-   * [Introduction](#introduction)
-   * [Server](#server)
-      * [Server Directory Structure](#server-directory-structure)
-      * [main.go](#main.go)
-      * [Models](#models)
-        * [user.go](#user.go)
-        * [room.go](#room.go)
-      * [API](#api)
-        * [auth.go](#auth.go)
-        * [friend.go](#friend.go)
-        * [room.go](#room.go)
-      * [Chat](#chat)
-        * [connect.go](#connect.go)
-        * [client.go](#client.go)
-        * [pool.go](#pool.go)
-    * [Client](#client)
-      * [Client Directory Structure](#client-directory-structure)
+* [Introduction](#introduction)
+* [Server](#server)
+   * [Server Directory Structure](#server-directory-structure)
+   * [Main](#main)
+   * [Models](#models)
+     * [user.go](#user.go)
+     * [room.go](#room.go)
+   * [API](#api)
+     * [auth.go](#auth.go)
+     * [friend.go](#friend.go)
+     * [room.go](#room.go)
+   * [Chat](#chat)
+     * [connect.go](#connect.go)
+     * [client.go](#client.go)
+     * [pool.go](#pool.go)
+* [Client](#client)
+  * [Client Directory Structure](#client-directory-structure)
       
 ## Introduction
 This web application allows users to communicate in real-time with other users. Users can add friends and create rooms on the homepage. Data is sent to and received
@@ -51,7 +51,7 @@ This web application allows users to communicate in real-time with other users. 
 └── routes
     └── routes.go
 </pre>
-### main.go
+### Main
 - The main file first connects to the MongoDB database through the method in database/connect.go
   - Disconnecting from the database is deferred immediately after the connection completes
 - Next, a new fiber instance is instantiated
