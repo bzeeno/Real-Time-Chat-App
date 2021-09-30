@@ -20,6 +20,8 @@ Table of Contents
         * [connect.go](#connect.go)
         * [client.go](#client.go)
         * [pool.go](#pool.go)
+    * [Client](#client)
+      * [Client Directory Structure](#client-directory-structure)
       
 ## Introduction
 This web application allows users to communicate in real-time with other users. Users can add friends and create rooms on the homepage. Data is sent to and received
@@ -148,4 +150,49 @@ the message is saved in the database.
   - If the pool receives a request on the unregister channel, the client is removed from the pool and the client coutn is decremented
   - If the pool receives a request on the broadcast channel, the message is broadcasted to all connected clients
 
-
+## Client
+### Client Directory Structure
+<pre>
+├── build
+│   ├── ...
+├── node_modules
+│   ├── ...
+├── public
+│   ├── default_pic.jpeg
+|   ├── default_room.jpeg
+|   └── ...
+├── src
+│   ├── App.css
+│   ├── App.js
+|   ├── index.css
+|   ├── index.js
+|   ├── reportWebVitals.js
+|   ├── components
+|   |   ├── Button.js
+|   |   ├── Button.scss
+|   |   ├── CreateRoom.js
+|   |   ├── CreateRoom.scss
+|   |   ├── Dropdown.js
+|   |   ├── Dropdown.scss
+|   |   ├── MessageBox.js
+|   |   ├── MessageBox.scss
+|   |   ├── Message.js
+|   |   ├── Message.scss
+|   |   ├── Navbar.js
+|   |   ├── Navbar.scss
+|   |   ├── Preview.js
+|   |   ├── Preview.scss
+|   |   ├── Search.js
+|   |   └── Search.scss
+|   └──pages
+|      ├── Friend.js
+|      ├── Home.js
+|      ├── Home.scss
+|      ├── Login.js
+|      ├── Login.scss
+|      ├── Logout.js
+|      ├── Register.js
+|      ├── RoomFriend.scss
+|      └── Room.js 
+└── ...
+</pre>
